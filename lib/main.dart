@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:simply_halal/screens/account_screen.dart';
 import 'package:simply_halal/screens/favorite_screen.dart';
 import 'package:simply_halal/screens/home_screen.dart';
@@ -39,21 +38,39 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    const navBarTopBorderColor = Color(0xffD9D9D9);
     return Scaffold(
       body: pages[currentPage],
-      bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: "Home"),
-          NavigationDestination(icon: Icon(Icons.search), label: "Search"),
-          NavigationDestination(icon: Icon(Icons.star), label: "Star"),
-          NavigationDestination(icon: Icon(Icons.person), label: "Account")
-        ],
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPage = index;
-          });
-        },
-        selectedIndex: currentPage,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+            color: navBarTopBorderColor,
+            border: Border(
+                top: BorderSide(color: navBarTopBorderColor, width: 1.0))),
+        child: NavigationBar(
+          surfaceTintColor: Colors.red,
+          backgroundColor: Colors.white,
+          destinations: [
+            NavigationDestination(
+                icon: Image.asset(
+                  "images/home.png",
+                  height: 20,
+                  width: 20,
+                  color: Colors.black,
+                ),
+                label: ""),
+            const NavigationDestination(icon: Icon(Icons.search), label: ""),
+            const NavigationDestination(
+                icon: Icon(Icons.favorite_outline), label: ""),
+            const NavigationDestination(
+                icon: Icon(Icons.person_outline), label: "")
+          ],
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPage = index;
+            });
+          },
+          selectedIndex: currentPage,
+        ),
       ),
     );
   }
