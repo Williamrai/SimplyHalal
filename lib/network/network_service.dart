@@ -23,13 +23,13 @@ class NetworkService {
     }
 
     if (requestType == RequestType.post) {
-      return null;
+      return http.post(uri, headers: headers, body: body);
     }
 
     return null;
   }
 
-  static Future<http.Response?>? sendRequest({
+  static Future<http.Response?>? sendGetRequest({
     required RequestType requestType,
     required String url,
     Map<String, dynamic>? body,
