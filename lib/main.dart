@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:simply_halal/root_page.dart';
 
 void main() {
@@ -9,9 +10,13 @@ class SimplyHalalApp extends StatelessWidget {
   const SimplyHalalApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    const appColor = Color(0xff488B49);
+    SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(statusBarColor: appColor));
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RootPage(),
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: const RootPage(),
     );
   }
 }
