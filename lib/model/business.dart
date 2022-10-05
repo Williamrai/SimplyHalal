@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:simply_halal/database/business_table.dart';
 part 'business.g.dart';
 
 /*
@@ -44,6 +45,9 @@ class Business {
       _$BusinessFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusinessToJson(this);
+  static Business dbFromJson(Map<String, Object?> json) => Business(
+        id: json[BusinessFields.id],
+      );
 }
 
 @JsonSerializable()

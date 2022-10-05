@@ -1,57 +1,76 @@
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../model/business.dart';
+import 'business_table.dart';
 
-
-const String tableBusiness = "business";
-
-class BusinessDatabase {
-  static final BusinessDatabase instance = BusinessDatabase._init();
+class SimplyHalalDatabase {
+  static final SimplyHalalDatabase instance = SimplyHalalDatabase._init();
 
   static Database? _database;
 
-  BusinessDatabase._init();
+  SimplyHalalDatabase._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDB('business.db');
+    _database = await _initDB('simplyhalal.db');
     return _database!;
   }
 
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    final path = dbPath + filePath;
+    final path = join(dbPath, filePath);
 
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
+  //  final double? rating;
+  // final String? phone;
+  // final String id;
+  // final String? alias;
+  // @JsonKey(name: "is_closed")
+  // final bool isClosed;
+  // final List<Categories?> categories;
+  // final String name;
+  // final String url;
+  // @JsonKey(name: "image_url")
+  // final String imageUrl;
+  // final Coordinates coordinates;
 
   Future _createDB(Database db, int version) async {
-    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const textType = 'TEXT NOT NULL';
-    const listType = 'LIST NOT NUL';
-    const doubleType = 'INTEGER NOT NULL';
-    const boolType = 'BOOLEAN NOT NULL';
+    final idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    final textType = 'TEXT NOT NULL';
+    final boolType = 'BOOLEAN NOT NULL';
 
-    await db.execute('''CREATE TABLE $tableBusiness (
-      ${Business.rating} $doubleType,
-      ${Business.phone} $textType,
-      ${Business.id} $idType,
-      ${Business.alias} $textType,
-      ${Business.isClosed} $boolType,
-      ${Business.categories} $listType,
-      ${Business.name} $textType,
-      ${Business.url} $textType,
-      ${Business.imageUrl} $textType,
-      ${Business.coordinates} $textType,
-    )''');
+    await db.execute(''' 
+    CREATE TABLE $tableBusiness;
+      ${BusinessFields.id} $idType,
+      ${BusinessFields.rating} $textType,
+      ${BusinessFields.phone} $textType,
+      ${BusinessFields.alias} $textType,
+      ${BusinessFields.isClosed} $boolType,
+      ${BusinessFields.name} $textType,
+      ${BusinessFields.websiteUrl} $textType,
+      ${BusinessFields.imageUrl} $textType,
+      ${BusinessFields.latitude} $textType,
+      ${BusinessFields.longitude} $textType,
+      
+    ''');
   }
 
   Future<Business> create(Business business) async {
     final db = await instance.database;
 
-    final id = await db.insert(tableBusiness, business.toJson());
-    return business.copyWith(id: id);
+    final json = business.toJson();
+    final columns =
+        '${BusinessFields.rating}, ${BusinessFields.phone}, ${BusinessFields.alias}, ${BusinessFields.isClosed}, ${BusinessFields.name}, ${BusinessFields.websiteUrl}, ${BusinessFields.imageUrl}, ${BusinessFields.latitude}, ${BusinessFields.longitude} ';
+    final values =
+        '${json[BusinessFields.rating]}, ${json[BusinessFields.phone]}, ${json[BusinessFields.alias]}, ${json[BusinessFields.isClosed]}, ${json[BusinessFields.name]}, ${json[BusinessFields.websiteUrl]}, ${json[BusinessFields.imageUrl]}, ${json[BusinessFields.latitude]}, ${json[BusinessFields.longitude]} ';
+
+    final id = await db
+        .rawInsert('INSERT INTO $tableBusiness ($columns) VALUES ($values)');
+
+    return business;
   }
 
   Future<Business> readBusiness(int id) async {
@@ -59,47 +78,14 @@ class BusinessDatabase {
 
     final maps = await db.query(
       tableBusiness,
-      columns: Business.,
-      where: '${Business.id} = ?',
+      columns: BusinessFields.values,
+      where: '${BusinessFields.id} = ?',
       whereArgs: [id],
     );
 
     if (maps.isNotEmpty) {
-      return Business.BusinessFromJson(maps.first);
-    } else {
-      throw Exception('ID $id not found');
+      return Business.fromJson(maps.first);
     }
-  }
-
-  Future<List<Business>> readAllBusiness() async {
-    final db = await instance.database;
-
-    const orderBy = '${Business.name} ASC';
-
-    final result = await db.query(tableBusiness, orderBy: orderBy);
-
-    return result.map((json) => Business.BusinessFromJson(json)).toList();
-  }
-
-  Future<int> update(Business business) async {
-    final db = await instance.database;
-
-    return db.update(
-      tableBusiness,
-      business.toJson(),
-      where: '${Business.id} = ?',
-      whereArgs: [business.id],
-    );
-  }
-
-  Future<int> delete(int id) async {
-    final db = await instance.database;
-
-    return await db.delete(
-      tableBusiness,
-      where: '${Business.id} = ?',
-      whereArgs: [id],
-    );
   }
 
   Future close() async {
