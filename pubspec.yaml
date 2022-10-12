@@ -38,6 +38,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.5 
   json_annotation: ^4.7.0
+  geolocator: ^9.0.2
+  location: ^4.2.0
+  geocoding: ^2.0.5
+
 
 
 dev_dependencies:

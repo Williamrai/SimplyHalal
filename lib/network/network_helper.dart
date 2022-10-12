@@ -17,7 +17,7 @@ class NetworkHelper {
     final StringBuffer stringBuffer = StringBuffer("$url?");
     queryParameters.forEach((key, value) {
       if (value.toLowerCase() == '') return;
-      if (value.contains(' ')) throw Exception('Invalid Input Exception');
+      //if (value.contains(' ')) throw Exception('Invalid Input Exception');
       stringBuffer.write('$key=$value&');
     });
     final result = stringBuffer.toString();

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:simply_halal/model/business.dart';
+import 'package:simply_halal/model/current_location.dart';
 import 'package:simply_halal/model/favorite_model.dart';
+import 'package:simply_halal/network/network_enums.dart';
+import 'package:simply_halal/network/network_helper.dart';
+import 'package:simply_halal/network/network_service.dart';
+import 'package:simply_halal/network/simply_halal_api_endpoints.dart';
+import 'package:simply_halal/network/simply_halal_api_params.dart';
 import 'package:simply_halal/screens/account_screen.dart';
 import 'package:simply_halal/screens/favorite_screen.dart';
 import 'package:simply_halal/screens/home_screen.dart';
 import 'package:simply_halal/screens/search_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
@@ -55,9 +64,24 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        return const HomeScreen();
+        //return const HomeScreen(businesses: []);
+        return FutureBuilder(
+            future: getData(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                final List<Business> businesses =
+                    snapshot.data as List<Business>;
+                return HomeScreen(businesses: businesses);
+              } else if (snapshot.hasError) {
+                return const Text("Something went wrong");
+              } else {
+                return const Text("Unknown Error");
+              }
+            });
 
       case 1:
+        getData();
         return const SearchScreen();
 
       case 2:
@@ -69,9 +93,68 @@ class _RootPageState extends State<RootPage> {
         return const AccountScreen();
 
       default:
-        return const HomeScreen();
+        return const HomeScreen(businesses: []);
     }
   }
+
+  // Current Location
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled');
+    }
+
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error("Location services are denied");
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permisssions.');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<String> getCurrentAddress() async {
+    // retrieve current position
+    Position position = await _determinePosition();
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+    CurrentLocation.currentLocality = placemarks[0].postalCode ?? "";
+    CurrentLocation.currentMetropolitian =
+        placemarks[0].administrativeArea ?? "";
+    return placemarks[0].postalCode ?? "";
+  }
+
+  Future<List<Business>?> getData() async {
+    final location = await getCurrentAddress();
+    final response = await NetworkService.sendGetRequest(
+        url: SimplyHalalApiEndpoints.apiURL,
+        queryParam: SimplyHalalApiParam.apiQuery(location: location));
+
+    return await NetworkHelper.filterResponse(
+        callback: _listOfBusinessFromJson,
+        response: response,
+        parameterName: CallBackParameterName.allBusiness,
+        onFailureCallbackWithMessage: (errorType, msg) {
+          debugPrint('Error Type: $errorType; message: $msg');
+          return null;
+        });
+  }
+
+  List<Business> _listOfBusinessFromJson(json) => (json as List)
+      .map((e) => Business.fromJson(e as Map<String, dynamic>))
+      .toList();
 
   List<FavoriteModel> getFavoriteModel() {
     // dummy data

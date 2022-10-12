@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:simply_halal/network/network_helper.dart';
-
+import 'package:simply_halal/model/current_location.dart';
+import 'package:simply_halal/widgets/Business_card_view.dart';
 import '../model/business.dart';
-import '../network/simply_halal_api_endpoints.dart';
-import '../network/network_service.dart';
-import '../network/simply_halal_api_params.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final List<Business> businesses;
+
+  const HomeScreen({super.key, required this.businesses});
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +17,27 @@ class HomeScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-              child: const Text(
-                "Current Location",
+              child: Text(
+                "${CurrentLocation.currentLocality}, ${CurrentLocation.currentMetropolitian}",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                     fontFamily: 'OpenSans',
                     fontWeight: FontWeight.w700,
                     fontSize: 20),
               ),
             ),
+            Expanded(
+                child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: businesses.length,
+                    itemBuilder: (context, index) {
+                      final business = businesses[index];
+                      return BusinessCardView(
+                          imageUrl: business.imageUrl,
+                          miles: "0.2mi",
+                          name: business.name);
+                    })),
           ],
         ),
       ),

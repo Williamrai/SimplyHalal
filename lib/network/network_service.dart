@@ -30,7 +30,7 @@ class NetworkService {
   }
 
   static Future<http.Response?>? sendGetRequest({
-    required RequestType requestType,
+    RequestType requestType = RequestType.get,
     required String url,
     Map<String, dynamic>? body,
     Map<String, String>? queryParam,
