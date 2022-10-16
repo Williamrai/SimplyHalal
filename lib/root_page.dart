@@ -10,6 +10,7 @@ import 'package:simply_halal/network/simply_halal_api_params.dart';
 import 'package:simply_halal/screens/account_screen.dart';
 import 'package:simply_halal/screens/favorite_screen.dart';
 import 'package:simply_halal/screens/home_screen.dart';
+import 'package:simply_halal/screens/restaurant_details_screen.dart';
 import 'package:simply_halal/screens/search_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -65,6 +66,7 @@ class _RootPageState extends State<RootPage> {
     switch (pageIndex) {
       case 0:
         //return const HomeScreen(businesses: []);
+        //  return RestaurantDetailScreen(id: ,);
         return FutureBuilder(
             future: getData(),
             builder: (context, snapshot) {
@@ -138,7 +140,7 @@ class _RootPageState extends State<RootPage> {
 
   Future<List<Business>?> getData() async {
     final location = await getCurrentAddress();
-    final response = await NetworkService.sendGetRequest(
+    final response = await NetworkService.sendGetRequestWithQuery(
         url: SimplyHalalApiEndpoints.apiURL,
         queryParam: SimplyHalalApiParam.apiQuery(location: location));
 

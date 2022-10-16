@@ -15,7 +15,7 @@ class SimplyHalalApp extends StatelessWidget {
         const SystemUiOverlayStyle(statusBarColor: appColor));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
       home: const RootPage(),
     );
   }

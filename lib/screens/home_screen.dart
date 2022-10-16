@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/current_location.dart';
+import 'package:simply_halal/screens/restaurant_details_screen.dart';
 import 'package:simply_halal/widgets/Business_card_view.dart';
 import '../model/business.dart';
 
@@ -33,10 +34,20 @@ class HomeScreen extends StatelessWidget {
                     itemCount: businesses.length,
                     itemBuilder: (context, index) {
                       final business = businesses[index];
-                      return BusinessCardView(
-                          imageUrl: business.imageUrl,
-                          miles: "0.2mi",
-                          name: business.name);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  RestaurantDetailScreen(id: business.id),
+                            ),
+                          );
+                        },
+                        child: BusinessCardView(
+                            imageUrl: business.imageUrl,
+                            miles: "0.2mi",
+                            name: business.name),
+                      );
                     })),
           ],
         ),

@@ -5,13 +5,15 @@ class SmallText extends StatelessWidget {
   final String text;
   double size;
   double height;
+  TextAlign align;
 
   SmallText(
       {super.key,
       this.color,
       required this.text,
       this.size = 12,
-      this.height = 1.2});
+      this.height = 1.2,
+      this.align = TextAlign.left});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class SmallText extends StatelessWidget {
         fontFamily: 'OpenSans',
         height: height,
       ),
-      textAlign: TextAlign.left,
+      textAlign: align,
     );
   }
 }

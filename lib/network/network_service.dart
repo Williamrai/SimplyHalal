@@ -29,7 +29,26 @@ class NetworkService {
     return null;
   }
 
-  static Future<http.Response?>? sendGetRequest({
+  static Future<http.Response?>? sendGetRequestWithParameter(
+      {RequestType requestType = RequestType.get,
+      required String url,
+      dynamic param}) async {
+    try {
+      final fullHeader = _getHeaders();
+      final fullUrl = '$url/$param';
+      final response = await _createRequest(
+          requestType: requestType,
+          uri: Uri.parse(fullUrl),
+          headers: fullHeader);
+
+      return response;
+    } catch (e) {
+      print('Error -> $e');
+      return null;
+    }
+  }
+
+  static Future<http.Response?>? sendGetRequestWithQuery({
     RequestType requestType = RequestType.get,
     required String url,
     Map<String, dynamic>? body,
