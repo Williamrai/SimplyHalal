@@ -16,10 +16,12 @@ class MapScreenState extends State<MapScreen> {
               center: LatLng(27.125002, 78.0421170902921), minZoom: 17.0),
           children: [
             TileLayer(
-                urlTemplate: "Generated Template",
+                urlTemplate:
+                    "https://api.mapbox.com/styles/v1/marz-hunter/cl9c7sag3000114mvj0scrwfb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ",
                 additionalOptions: const {
-                  'accessToken': 'Generated Acess token',
-                  'id': 'mapbox.mapbox-streets-v7'
+                  'accessToken':
+                      'pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ',
+                  'id': 'mapbox.mapbox-streets-v8'
                 }),
           ]),
     );
