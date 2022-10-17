@@ -10,6 +10,7 @@ import 'package:simply_halal/network/simply_halal_api_params.dart';
 import 'package:simply_halal/screens/account_screen.dart';
 import 'package:simply_halal/screens/favorite_screen.dart';
 import 'package:simply_halal/screens/home_screen.dart';
+import 'package:simply_halal/screens/map_screen.dart';
 import 'package:simply_halal/screens/search_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -64,8 +65,10 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        //return const HomeScreen(businesses: []);
-        //  return RestaurantDetailScreen(id: ,);
+        return MapScreen();
+      //return const HomeScreen(businesses: []);
+      //  return RestaurantDetailScreen(id: ,);
+      /*
         return FutureBuilder(
             future: getData(),
             builder: (context, snapshot) {
@@ -86,7 +89,7 @@ class _RootPageState extends State<RootPage> {
                 );
               }
             });
-
+      */
       case 1:
         getData();
         return const SearchScreen();
