@@ -78,7 +78,13 @@ class _RootPageState extends State<RootPage> {
               } else if (snapshot.hasError) {
                 return const Text("Something went wrong");
               } else {
-                return const Text("Unknown Error");
+                return const SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               }
             });
 
