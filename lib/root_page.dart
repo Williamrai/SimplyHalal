@@ -17,6 +17,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:developer';
 
+import 'package:simply_halal/utils.dart';
+
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
 
@@ -26,6 +28,14 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   int currentPage = 0;
+  Future<List<Business>?>? businesses;
+
+  @override
+  void initState() {
+    super.initState();
+
+    businesses = getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,27 +79,28 @@ class _RootPageState extends State<RootPage> {
       case 0:
         // return const HomeScreen(businesses: []);
         // return RestaurantDetailScreen(id: ,);
-        return FutureBuilder(
-            future: getData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData) {
-                final List<Business> businesses =
-                    snapshot.data as List<Business>;
-                return HomeScreen(businesses: businesses);
-              } else if (snapshot.hasError) {
-                return const Text("Something went wrong");
-              } else {
-                return const SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-            });
-
+        return RefreshIndicator(
+            onRefresh: () => _refreshData(context),
+            child: FutureBuilder(
+                future: businesses,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasData) {
+                    final List<Business> businesses =
+                        snapshot.data as List<Business>;
+                    return HomeScreen(businesses: businesses);
+                  } else if (snapshot.hasError) {
+                    return const Text("Something went wrong");
+                  } else {
+                    return const SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                }));
       case 1:
         getData();
         return const SearchScreen();
@@ -146,33 +157,48 @@ class _RootPageState extends State<RootPage> {
     return placemarks[0].postalCode ?? "";
   }
 
-  Future<List<Business>?> getData() async {
-    final businesses = await DatabaseHelper.db.getAllBusiness();
+  Future<void> _refreshData(BuildContext context) async {
+    setState(() {
+      businesses = getData();
+    });
+  }
 
-    if (businesses != null && businesses.isEmpty) {
-      log("business: ${businesses.length}");
+  Future<List<Business>?> getData() async {
+    final location = await getCurrentAddress();
+
+    if (Utils.hasLocationChanged(location)) {
+      log("business: Api Call");
+
+      final response = await NetworkService.sendGetRequestWithQuery(
+          url: SimplyHalalApiEndpoints.apiURL,
+          queryParam: SimplyHalalApiParam.apiQuery(location: location));
+
+      List<Business> allBusiness = await NetworkHelper.filterResponse(
+          callback: _listOfBusinessFromJson,
+          response: response,
+          parameterName: CallBackParameterName.allBusiness,
+          onFailureCallbackWithMessage: (errorType, msg) {
+            debugPrint('Error Type: $errorType; message: $msg');
+            return null;
+          });
+
+      await DatabaseHelper.db.deleteBusinesses();
+
+      for (Business business in allBusiness) {
+        await DatabaseHelper.db.addBusiness(business);
+      }
+
+      Utils.currentLocation = location;
+      return allBusiness;
+    }
+
+    final businesses = await DatabaseHelper.db.getAllBusiness();
+    if ((businesses != null && businesses.isNotEmpty)) {
+      log("business: db Call ${businesses.length}");
       return businesses;
     }
 
-    final location = await getCurrentAddress();
-    final response = await NetworkService.sendGetRequestWithQuery(
-        url: SimplyHalalApiEndpoints.apiURL,
-        queryParam: SimplyHalalApiParam.apiQuery(location: location));
-
-    List<Business> allBusiness = await NetworkHelper.filterResponse(
-        callback: _listOfBusinessFromJson,
-        response: response,
-        parameterName: CallBackParameterName.allBusiness,
-        onFailureCallbackWithMessage: (errorType, msg) {
-          debugPrint('Error Type: $errorType; message: $msg');
-          return null;
-        });
-
-    for (Business business in allBusiness) {
-      await DatabaseHelper.db.addBusiness(business);
-    }
-
-    return allBusiness;
+    return null;
   }
 
   List<Business> _listOfBusinessFromJson(json) => (json as List)

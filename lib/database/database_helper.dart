@@ -35,7 +35,8 @@ class DatabaseHelper {
   Future<int> addBusiness(Business business) async {
     final db = await database;
 
-    return await db.insert("Business", business.toJson());
+    return await db.insert("Business", business.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Business>?> getAllBusiness() async {
@@ -49,5 +50,11 @@ class DatabaseHelper {
 
     return List.generate(
         maps.length, (index) => Business.fromJson(maps[index]));
+  }
+
+  Future<int> deleteBusinesses() async {
+    final db = await database;
+
+    return await db.delete("Business");
   }
 }
