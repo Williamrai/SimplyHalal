@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simply_halal/database/database_helper.dart';
 import 'package:simply_halal/model/business.dart';
 import 'package:simply_halal/model/current_location.dart';
 import 'package:simply_halal/model/favorite_model.dart';
@@ -14,6 +15,7 @@ import 'package:simply_halal/screens/restaurant_details_screen.dart';
 import 'package:simply_halal/screens/search_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'dart:developer';
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
@@ -65,8 +67,8 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        //return const HomeScreen(businesses: []);
-        //  return RestaurantDetailScreen(id: ,);
+        // return const HomeScreen(businesses: []);
+        // return RestaurantDetailScreen(id: ,);
         return FutureBuilder(
             future: getData(),
             builder: (context, snapshot) {
@@ -145,12 +147,19 @@ class _RootPageState extends State<RootPage> {
   }
 
   Future<List<Business>?> getData() async {
+    final businesses = await DatabaseHelper.db.getAllBusiness();
+
+    if (businesses != null && businesses.isEmpty) {
+      log("business: ${businesses.length}");
+      return businesses;
+    }
+
     final location = await getCurrentAddress();
     final response = await NetworkService.sendGetRequestWithQuery(
         url: SimplyHalalApiEndpoints.apiURL,
         queryParam: SimplyHalalApiParam.apiQuery(location: location));
 
-    return await NetworkHelper.filterResponse(
+    List<Business> allBusiness = await NetworkHelper.filterResponse(
         callback: _listOfBusinessFromJson,
         response: response,
         parameterName: CallBackParameterName.allBusiness,
@@ -158,6 +167,12 @@ class _RootPageState extends State<RootPage> {
           debugPrint('Error Type: $errorType; message: $msg');
           return null;
         });
+
+    for (Business business in allBusiness) {
+      await DatabaseHelper.db.addBusiness(business);
+    }
+
+    return allBusiness;
   }
 
   List<Business> _listOfBusinessFromJson(json) => (json as List)
