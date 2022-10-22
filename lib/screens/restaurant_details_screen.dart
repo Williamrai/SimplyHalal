@@ -1,6 +1,8 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/business_details.dart';
-import 'package:simply_halal/network/network_api_client.dart';
+import 'package:simply_halal/screens/map_screen.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 
@@ -14,25 +16,62 @@ class RestaurantDetailScreen extends StatelessWidget {
       body: SafeArea(
           child: Column(
         children: [
-          FutureBuilder(
-              future: NetworkAPiClient.getBusinessDetails(id),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
-                  final BusinessDetails businessDetails =
-                      snapshot.data as BusinessDetails;
-
-                  return restaurantDetailsWidget(businessDetails);
-                } else {
-                  return const Text("No Data");
-                }
-              })
+          restaurantDetailsWidget(BusinessDetails())
+          // FutureBuilder(
+          //     future: NetworkAPiClient.getBusinessDetails(id),
+          //     builder: (context, snapshot) {
+          //       if (snapshot.connectionState == ConnectionState.done &&
+          //           snapshot.hasData) {
+          //         final BusinessDetails businessDetails =
+          //             snapshot.data as BusinessDetails;
+          //
+          //         return restaurantDetailsWidget(businessDetails);
+          //       } else {
+          //         return const Text("No Data");
+          //       }
+          //     })
         ],
       )),
     );
   }
 
   Widget restaurantDetailsWidget(BusinessDetails businessDetails) {
+    Location location = Location(
+      address1: '103-09 Metropolitan Ave',
+      city: 'Forest Hills',
+      zipCode: '11375',
+      country: 'US',
+      state: 'NY',
+    );
+
+    var openHours = <Open>[
+      Open(isOvernight: false, start: '1100', end: '2200', day: 0),
+      Open(isOvernight: false, start: '1100', end: '2200', day: 1),
+      Open(isOvernight: false, start: '1100', end: '2200', day: 2),
+      Open(isOvernight: false, start: '1100', end: '2200', day: 3),
+      Open(isOvernight: false, start: '1100', end: '2300', day: 4),
+      Open(isOvernight: false, start: '1100', end: '2300', day: 5),
+      Open(isOvernight: false, start: '1100', end: '2200', day: 6),
+    ];
+
+    var hours = <Hours>[Hours(open: openHours)];
+
+    //@TODO:  update your restaurant lat and long
+    var coordinates = Coordinates(latitude: 0.0, longitude: 0.0);
+
+    BusinessDetails businessDetails = BusinessDetails(
+        id: 'rpzgv0Y6fIT6RcBsxFsrSg',
+        name: 'Paratha Wala',
+        imageUrl:
+            'https://s3-media2.fl.yelpcdn.com/bphoto/MdUDvgSjiCsN3Vol4nuY1g/o.jpg',
+        url:
+            'https://www.yelp.com/biz/paratha-wala-forest-hills-2?adjust_creative=nwxUgqt8-kX0wwz0_JOb9g&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=nwxUgqt8-kX0wwz0_JOb9g',
+        displayPhone: '(347) 561-5319',
+        rating: 4.5,
+        location: location,
+        hours: hours,
+        coordinates: coordinates);
+    
     return Column(
       children: [
         // name of the business
@@ -70,10 +109,17 @@ class RestaurantDetailScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+                      Builder(builder: (context) => GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => MapScreen(coordinates: businessDetails.coordinates!)));
+                        },
+                        child: SmallText(text: " direction",size: 20,),
+                      ),),
                       GestureDetector(
                         onTap: () {},
                         child: Icon(Icons.favorite_outline),
-                      )
+                      ),
+
                     ],
                   ),
                 ),

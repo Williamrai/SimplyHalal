@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:simply_halal/model/business_details.dart';
 
 class MapScreen extends StatefulWidget {
+  // This is under BusinessDetails file
+  // you will receive this lat and long from the business details
+
+  // right now you will receive lat and long as 0.0
+  // to update it goTo restaurantDetailsWidget() of RestaurantDetailsScreen
+  final Coordinates coordinates;
+
+  MapScreen({super.key, required this.coordinates});
+
   @override
-  MapScreenState createState() => new MapScreenState();
+  MapScreenState createState() => MapScreenState();
 }
 
 class MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
+
+    // this will give you the latitude of the business details
+    // widget.coordinates.latitude
+
+
     return Scaffold(
       body: FlutterMap(
           options: MapOptions(
