@@ -102,13 +102,21 @@ class _RootPageState extends State<RootPage> {
                   }
                 }));
       case 1:
-        getData();
         return const SearchScreen();
 
       case 2:
         // retrieve favorite model
-        List<FavoriteModel> models = getFavoriteModel();
-        return FavoriteScreen(favoriteModels: models);
+        return FutureBuilder(
+            future: getFavorites(),
+            builder: ((context, snapshot) {
+              if (snapshot.hasData) {
+                final favorites = snapshot.data as List<FavoriteModel>;
+                return FavoriteScreen(favoriteModels: favorites);
+              } else {
+                List<FavoriteModel> favorites = [];
+                return FavoriteScreen(favoriteModels: favorites);
+              }
+            }));
 
       case 3:
         return const AccountScreen();
@@ -116,6 +124,10 @@ class _RootPageState extends State<RootPage> {
       default:
         return const HomeScreen(businesses: []);
     }
+  }
+
+  Future<List<FavoriteModel>?> getFavorites() async {
+    return await DatabaseHelper.db.getAllFavorites();
   }
 
   // Current Location
@@ -149,6 +161,8 @@ class _RootPageState extends State<RootPage> {
   Future<String> getCurrentAddress() async {
     // retrieve current position
     Position position = await _determinePosition();
+    Utils.currentLocLat = position.latitude;
+    Utils.currentLocLong = position.longitude;
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
     CurrentLocation.currentLocality = placemarks[0].postalCode ?? "";
@@ -204,46 +218,4 @@ class _RootPageState extends State<RootPage> {
   List<Business> _listOfBusinessFromJson(json) => (json as List)
       .map((e) => Business.fromJson(e as Map<String, dynamic>))
       .toList();
-
-  List<FavoriteModel> getFavoriteModel() {
-    // dummy data
-    List<FavoriteModel> favorites = [
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80",
-          "Restro De Mango",
-          0.2),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-          "Meatyy Halal Diner",
-          1.2),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-          "Halal Cake and Go",
-          0.8),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-          "Bowls GetIt",
-          1.4),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-          "Watery Ice Cream",
-          2.3),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1609951651556-5334e2706168?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-          "Tipsy Bar",
-          0.2),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1432139509613-5c4255815697?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=685&q=80",
-          "FoodLove Restuarant",
-          0.2),
-      FavoriteModel(
-          "https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=722&q=80",
-          "Grab Burgers",
-          0.2),
-    ];
-
-    // @TODO: retrieve list of favorite data from either local database or from the firebase or from any databse we create later
-
-    return favorites;
-  }
 }

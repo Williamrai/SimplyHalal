@@ -1,6 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:simply_halal/database/database_helper.dart';
 import 'package:simply_halal/model/business_details.dart';
+import 'package:simply_halal/model/favorite_model.dart';
 import 'package:simply_halal/network/network_api_client.dart';
+import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 import 'package:intl/intl.dart';
@@ -23,9 +28,36 @@ class RestaurantDetailScreen extends StatelessWidget {
                   final BusinessDetails businessDetails =
                       snapshot.data as BusinessDetails;
 
-                  return restaurantDetailsWidget(businessDetails);
+                  return FutureBuilder(
+                    future: checkIfFavorited(businessDetails),
+                    builder: ((context, snapshot) {
+                      if (snapshot.hasData) {
+                        Utils.isFavoriteClick = snapshot.data as bool;
+                        return RestaurantDetailsWidget(
+                            businessDetails: businessDetails);
+                      } else {
+                        return const Expanded(
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        );
+                      }
+                    }),
+                  );
                 } else {
-                  return const Text("No Data");
+                  return const Expanded(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
                 }
               })
         ],
@@ -33,7 +65,40 @@ class RestaurantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget restaurantDetailsWidget(BusinessDetails businessDetails) {
+  Future<bool> checkIfFavorited(BusinessDetails businessDetails) async {
+    final favoriteBusiness = FavoriteModel(
+        imageUrl: businessDetails.imageUrl ?? '',
+        businessName: businessDetails.name ?? '',
+        distance: getDistance(businessDetails.coordinates));
+    final business =
+        await DatabaseHelper.db.getFavoriteBusiness(favoriteBusiness);
+
+    log("$business");
+    if (business == null) {
+      return Future<bool>.value(false);
+    }
+    return Future<bool>.value(true);
+  }
+
+  double getDistance(Coordinates? coordinates) {
+    return 0.0;
+  }
+}
+
+class RestaurantDetailsWidget extends StatefulWidget {
+  final BusinessDetails businessDetails;
+  const RestaurantDetailsWidget({super.key, required this.businessDetails});
+
+  @override
+  State<RestaurantDetailsWidget> createState() =>
+      _RestaurantDetailsWidgetState();
+}
+
+class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
+  bool isFavoriteClick = Utils.isFavoriteClick;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // name of the business
@@ -41,7 +106,7 @@ class RestaurantDetailScreen extends StatelessWidget {
           width: double.infinity,
           margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
           child: BigText(
-            text: businessDetails.name ?? '',
+            text: widget.businessDetails.name ?? '',
             align: TextAlign.center,
           ),
         ),
@@ -50,7 +115,7 @@ class RestaurantDetailScreen extends StatelessWidget {
             child: Column(
               children: [
                 // Main Image of the business
-                imageRoundedBox(businessDetails.imageUrl ?? ''),
+                imageRoundedBox(widget.businessDetails.imageUrl ?? ''),
 
                 // rating and favorite
                 Padding(
@@ -58,22 +123,28 @@ class RestaurantDetailScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        child: Row(
-                          children: [
-                            BigText(
-                              text: '${businessDetails.rating}/5',
-                            ),
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            )
-                          ],
-                        ),
+                      Row(
+                        children: [
+                          BigText(
+                            text: '${widget.businessDetails.rating}/5',
+                          ),
+                          const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          )
+                        ],
                       ),
                       GestureDetector(
-                        onTap: () {},
-                        child: Icon(Icons.favorite_outline),
+                        onTap: () {
+                          setState(() {
+                            isFavoriteClick = !isFavoriteClick;
+                            Utils.isFavoriteClick = isFavoriteClick;
+                          });
+                          _addOrDeleteFavoriteModel();
+                        },
+                        child: (isFavoriteClick == false)
+                            ? const Icon(Icons.favorite_outline)
+                            : const Icon(Icons.favorite, color: Colors.red),
                       )
                     ],
                   ),
@@ -87,7 +158,7 @@ class RestaurantDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SmallText(
-                        text: businessDetails.location!.address1 ?? '',
+                        text: widget.businessDetails.location!.address1 ?? '',
                         size: 18,
                       ),
                       const SizedBox(
@@ -95,14 +166,14 @@ class RestaurantDetailScreen extends StatelessWidget {
                       ),
                       SmallText(
                         text:
-                            '${businessDetails.location!.city ?? ''}, ${businessDetails.location!.state ?? ''} ${businessDetails.location!.zipCode ?? ''}',
+                            '${widget.businessDetails.location!.city ?? ''}, ${widget.businessDetails.location!.state ?? ''} ${widget.businessDetails.location!.zipCode ?? ''}',
                         size: 18,
                       ),
                       const SizedBox(
                         height: 4,
                       ),
                       SmallText(
-                        text: businessDetails.displayPhone ?? '',
+                        text: widget.businessDetails.displayPhone ?? '',
                         size: 18,
                       ),
                       const SizedBox(
@@ -126,7 +197,7 @@ class RestaurantDetailScreen extends StatelessWidget {
                         height: 4,
                       ),
                       SmallText(
-                        text: '${businessDetails.name} restaurant menu',
+                        text: '${widget.businessDetails.name} restaurant menu',
                         size: 16,
                         color: Colors.blue,
                       ),
@@ -147,37 +218,37 @@ class RestaurantDetailScreen extends StatelessWidget {
                       BigText(text: 'Hours'),
                       SmallText(
                         text:
-                            'Mon: ${toNormalTime(extractStartHours(0, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Mon: ${toNormalTime(extractStartHours(0, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Tue: ${toNormalTime(extractStartHours(1, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Tue: ${toNormalTime(extractStartHours(1, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Wed: ${toNormalTime(extractStartHours(2, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Wed: ${toNormalTime(extractStartHours(2, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Thurs: ${toNormalTime(extractStartHours(3, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Thurs: ${toNormalTime(extractStartHours(3, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Fri: ${toNormalTime(extractStartHours(4, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Fri: ${toNormalTime(extractStartHours(4, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Sat: ${toNormalTime(extractStartHours(5, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Sat: ${toNormalTime(extractStartHours(5, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                       SmallText(
                         text:
-                            'Sun: ${toNormalTime(extractStartHours(6, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
+                            'Sun: ${toNormalTime(extractStartHours(6, widget.businessDetails))} - ${toNormalTime(extractEndHours(0, widget.businessDetails))}',
                         size: 14,
                       ),
                     ],
@@ -190,6 +261,47 @@ class RestaurantDetailScreen extends StatelessWidget {
   }
 
   // Helper functions
+
+  double getDistance(Coordinates? coordinates) {
+    return 0.0;
+  }
+
+  void _addOrDeleteFavoriteModel() {
+    final favoriteBusiness = FavoriteModel(
+      imageUrl: widget.businessDetails.imageUrl ?? '',
+      businessName: widget.businessDetails.name ?? '',
+      distance: getDistance(widget.businessDetails.coordinates),
+    );
+
+    if (isFavoriteClick == true) {
+      log("add");
+      _addFavoriteBusiness(favoriteBusiness);
+    } else {
+      _deleteFavoriteBusiness(favoriteBusiness);
+      log("delete");
+    }
+  }
+
+  Future<FavoriteModel?> getFavoriteBusinessToDelete(
+      FavoriteModel favoriteModel) async {
+    final favoriteBusinessToDelete =
+        await DatabaseHelper.db.getFavoriteBusiness(favoriteModel);
+
+    return favoriteBusinessToDelete;
+  }
+
+  void _addFavoriteBusiness(FavoriteModel favoriteBusiness) async {
+    await DatabaseHelper.db.addFavorite(favoriteBusiness);
+  }
+
+  void _deleteFavoriteBusiness(FavoriteModel favoriteBusiness) async {
+    final favoriteBusinessToDelete =
+        await getFavoriteBusinessToDelete(favoriteBusiness);
+    log("${favoriteBusinessToDelete?.id}, ${favoriteBusinessToDelete?.businessName}");
+
+    await DatabaseHelper.db.deleteFavorite(favoriteBusinessToDelete!);
+  }
+
   String extractStartHours(int day, BusinessDetails businessDetails) {
     return businessDetails.hours![0].open![day].start ?? '';
   }
