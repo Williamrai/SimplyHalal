@@ -56,11 +56,10 @@ class _RootPageState extends State<RootPage> {
                   width: 20,
                 ),
                 label: ""),
-            const NavigationDestination(icon: Icon(Icons.search), label: ""),
+            //const NavigationDestination(icon: Icon(Icons.search), label: ""),
             const NavigationDestination(
                 icon: Icon(Icons.favorite_outline), label: ""),
-            const NavigationDestination(
-                icon: Icon(Icons.person_outline), label: "")
+            //const NavigationDestination(icon: Icon(Icons.person_outline), label: "")
           ],
           onDestinationSelected: (int index) {
             setState(() {
@@ -76,8 +75,6 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        // return const HomeScreen(businesses: []);
-        // return RestaurantDetailScreen(id: ,);
         return RefreshIndicator(
             onRefresh: () => _refreshData(context),
             child: FutureBuilder(
@@ -100,10 +97,10 @@ class _RootPageState extends State<RootPage> {
                     );
                   }
                 }));
-      case 1:
+      case 2:
         return const SearchScreen();
 
-      case 2:
+      case 1:
         // retrieve favorite model
         return FutureBuilder(
             future: getFavorites(),

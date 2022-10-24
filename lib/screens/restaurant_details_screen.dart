@@ -12,7 +12,9 @@ import 'package:intl/intl.dart';
 
 class RestaurantDetailScreen extends StatelessWidget {
   final String id;
-  const RestaurantDetailScreen({super.key, required this.id});
+  final double distance;
+  const RestaurantDetailScreen(
+      {super.key, required this.id, required this.distance});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,8 @@ class RestaurantDetailScreen extends StatelessWidget {
                       if (snapshot.hasData) {
                         Utils.isFavoriteClick = snapshot.data as bool;
                         return RestaurantDetailsWidget(
-                            businessDetails: businessDetails);
+                            businessDetails: businessDetails,
+                            distance: distance);
                       } else {
                         return const Expanded(
                           child: SizedBox(
@@ -70,7 +73,7 @@ class RestaurantDetailScreen extends StatelessWidget {
         id: businessDetails.id ?? '',
         imageUrl: businessDetails.imageUrl ?? '',
         businessName: businessDetails.name ?? '',
-        distance: getDistance(businessDetails.coordinates));
+        distance: distance);
     final business =
         await DatabaseHelper.db.getFavoriteBusiness(favoriteBusiness);
 
@@ -80,15 +83,13 @@ class RestaurantDetailScreen extends StatelessWidget {
     }
     return Future<bool>.value(true);
   }
-
-  double getDistance(Coordinates? coordinates) {
-    return 0.0;
-  }
 }
 
 class RestaurantDetailsWidget extends StatefulWidget {
   final BusinessDetails businessDetails;
-  const RestaurantDetailsWidget({super.key, required this.businessDetails});
+  final double distance;
+  const RestaurantDetailsWidget(
+      {super.key, required this.businessDetails, required this.distance});
 
   @override
   State<RestaurantDetailsWidget> createState() =>
@@ -160,7 +161,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SmallText(
-                          text: widget.businessDetails.location!.address1 ?? '',
+                          text: widget.businessDetails.location?.address1 ?? '',
                           size: 18,
                         ),
                         const SizedBox(
@@ -168,7 +169,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ),
                         SmallText(
                           text:
-                              '${widget.businessDetails.location!.city ?? ''}, ${widget.businessDetails.location!.state ?? ''} ${widget.businessDetails.location!.zipCode ?? ''}',
+                              '${widget.businessDetails.location?.city ?? ''}, ${widget.businessDetails.location?.state ?? ''} ${widget.businessDetails.location?.zipCode ?? ''}',
                           size: 18,
                         ),
                         const SizedBox(
@@ -218,12 +219,15 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BigText(text: 'Hours'),
+                        widget.businessDetails.hours == null
+                            ? Container()
+                            : BigText(text: 'Hours'),
                         ListView.builder(
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
-                            itemCount:
-                                widget.businessDetails.hours![0].open!.length,
+                            itemCount: widget.businessDetails.hours == null
+                                ? 0
+                                : widget.businessDetails.hours?[0].open!.length,
                             itemBuilder: ((context, index) {
                               final days = [
                                 'Sun',
@@ -252,16 +256,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   // Helper functions
 
-  double getDistance(Coordinates? coordinates) {
-    return 0.0;
-  }
-
   void _addOrDeleteFavoriteModel() {
     final favoriteBusiness = FavoriteModel(
       id: widget.businessDetails.id,
       imageUrl: widget.businessDetails.imageUrl ?? '',
       businessName: widget.businessDetails.name ?? '',
-      distance: getDistance(widget.businessDetails.coordinates),
+      distance: widget.distance,
     );
 
     if (isFavoriteClick == true) {
@@ -294,11 +294,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   }
 
   String extractStartHours(int day, BusinessDetails businessDetails) {
-    return businessDetails.hours![0].open![day].start ?? '';
+    return businessDetails.hours?[0].open?[day].start ?? '';
   }
 
   String extractEndHours(int day, BusinessDetails businessDetails) {
-    return businessDetails.hours![0].open![day].end ?? '';
+    return businessDetails.hours?[0].open?[day].end ?? '';
   }
 
   String toNormalTime(String time) {

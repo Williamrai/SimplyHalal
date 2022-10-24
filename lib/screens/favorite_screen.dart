@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/favorite_model.dart';
 import 'package:simply_halal/screens/restaurant_details_screen.dart';
+import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 
@@ -40,7 +41,8 @@ class FavoriteScreen extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                             builder: (context) => RestaurantDetailScreen(
-                                id: favoriteModels[index].id!)),
+                                id: favoriteModels[index].id!,
+                                distance: favoriteModels[index].distance)),
                       );
                     },
                     child: favoriteView(
@@ -79,7 +81,9 @@ class FavoriteScreen extends StatelessWidget {
                   const SizedBox(
                     height: 6,
                   ),
-                  SmallText(text: "$distance mi")
+                  SmallText(
+                      text:
+                          "${Utils.getDistanceInMiles(distance).toStringAsFixed(2)} mi")
                 ],
               ),
             ),
