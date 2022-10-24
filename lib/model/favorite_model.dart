@@ -1,14 +1,14 @@
 class FavoriteModel {
-  int? id;
+  String? id;
   String imageUrl;
   String businessName;
   double distance;
 
   FavoriteModel({
+    required this.id,
     required this.imageUrl,
     required this.businessName,
     required this.distance,
-    this.id,
   });
 
   factory FavoriteModel.fromJson(Map<String, dynamic> json) => FavoriteModel(

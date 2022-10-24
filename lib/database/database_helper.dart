@@ -34,7 +34,7 @@ class DatabaseHelper {
         "distance REAL);");
 
     await db.execute("CREATE TABLE Favorite_Business "
-        "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "(id TEXT PRIMARY KEY,"
         "name TEXT NOT NULL,"
         "image_url TEXT,"
         "distance REAL);");

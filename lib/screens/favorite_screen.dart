@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/favorite_model.dart';
+import 'package:simply_halal/screens/restaurant_details_screen.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 
@@ -34,10 +35,19 @@ class FavoriteScreen extends StatelessWidget {
                 shrinkWrap: true,
                 itemCount: favoriteModels.length,
                 itemBuilder: (context, index) {
-                  return favoriteView(
-                      imageUrl: favoriteModels[index].imageUrl,
-                      businessName: favoriteModels[index].businessName,
-                      distance: favoriteModels[index].distance);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => RestaurantDetailScreen(
+                                id: favoriteModels[index].id!)),
+                      );
+                    },
+                    child: favoriteView(
+                        imageUrl: favoriteModels[index].imageUrl,
+                        businessName: favoriteModels[index].businessName,
+                        distance: favoriteModels[index].distance),
+                  );
                 }),
           )
         ]),
