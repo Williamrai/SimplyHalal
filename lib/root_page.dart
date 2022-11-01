@@ -56,10 +56,10 @@ class _RootPageState extends State<RootPage> {
                   width: 20,
                 ),
                 label: ""),
-            //const NavigationDestination(icon: Icon(Icons.search), label: ""),
+            const NavigationDestination(icon: Icon(Icons.search), label: ""),
             const NavigationDestination(
                 icon: Icon(Icons.favorite_outline), label: ""),
-            //const NavigationDestination(icon: Icon(Icons.person_outline), label: "")
+            const NavigationDestination(icon: Icon(Icons.person_outline), label: "")
           ],
           onDestinationSelected: (int index) {
             setState(() {
@@ -75,32 +75,34 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        return RefreshIndicator(
-            onRefresh: () => _refreshData(context),
-            child: FutureBuilder(
-                future: businesses,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.hasData) {
-                    final List<Business> businesses =
-                        snapshot.data as List<Business>;
-                    return HomeScreen(businesses: businesses);
-                  } else if (snapshot.hasError) {
-                    return const Text("Something went wrong");
-                  } else {
-                    return const SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-                }));
-      case 2:
+        return HomeScreen(businesses: []);
+        // @TODO uncomment below code and comment above code before demo or testing where home screen API call is required
+        // return RefreshIndicator(
+        //     onRefresh: () => _refreshData(context),
+        //     child: FutureBuilder(
+        //         future: businesses,
+        //         builder: (context, snapshot) {
+        //           if (snapshot.connectionState == ConnectionState.done &&
+        //               snapshot.hasData) {
+        //             final List<Business> businesses =
+        //                 snapshot.data as List<Business>;
+        //             return HomeScreen(businesses: businesses);
+        //           } else if (snapshot.hasError) {
+        //             return const Text("Something went wrong");
+        //           } else {
+        //             return const SizedBox(
+        //               width: double.infinity,
+        //               height: double.infinity,
+        //               child: Center(
+        //                 child: CircularProgressIndicator(),
+        //               ),
+        //             );
+        //           }
+        //         }));
+      case 1:
         return const SearchScreen();
 
-      case 1:
+      case 2:
         // retrieve favorite model
         return FutureBuilder(
             future: getFavorites(),
