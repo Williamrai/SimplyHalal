@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/current_location.dart';
 import 'package:simply_halal/screens/restaurant_details_screen.dart';
+import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/Business_card_view.dart';
 import '../model/business.dart';
 
@@ -38,14 +39,16 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  RestaurantDetailScreen(id: business.id),
+                              builder: (context) => RestaurantDetailScreen(
+                                  id: business.id,
+                                  distance: business.distance ?? 0),
                             ),
                           );
                         },
                         child: BusinessCardView(
                             imageUrl: business.imageUrl,
-                            miles: "0.2mi",
+                            miles:
+                                "${Utils.getDistanceInMiles(business.distance!).toStringAsFixed(2)} mi",
                             name: business.name),
                       );
                     })),

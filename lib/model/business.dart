@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 part 'business.g.dart';
 
 /*
@@ -13,48 +14,27 @@ part 'business.g.dart';
  */
 @JsonSerializable(explicitToJson: true)
 class Business {
-  final double? rating;
-  final String? phone;
   final String id;
-  final String? alias;
-  @JsonKey(name: "is_closed")
-  final bool isClosed;
-  final List<Categories?> categories;
   final String name;
-  final String url;
   @JsonKey(name: "image_url")
   final String imageUrl;
-  final Coordinates coordinates;
+  final double? rating;
+  final String? url;
+  final double? distance;
 
   Business(
-      {required this.rating,
-      required this.phone,
-      required this.id,
-      required this.alias,
-      required this.isClosed,
-      required this.categories,
+      {required this.id,
       required this.name,
-      required this.url,
       required this.imageUrl,
-      required this.coordinates});
+      required this.rating,
+      required this.url,
+      required this.distance});
 
   factory Business.fromJson(Map<String, dynamic> json) =>
       _$BusinessFromJson(json);
 
   Map<String, dynamic> toJson() => _$BusinessToJson(this);
-}
 
-@JsonSerializable()
-class Categories {
-  final String? alias;
-  final String? title;
-
-  Categories({required this.alias, required this.title});
-
-  factory Categories.fromJson(Map<String, dynamic> json) =>
-      _$CategoriesFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CategoriesToJson(this);
 }
 
 @JsonSerializable()
