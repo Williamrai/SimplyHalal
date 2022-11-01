@@ -1,13 +1,20 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:simply_halal/database/database_helper.dart';
 import 'package:simply_halal/model/business_details.dart';
+import 'package:simply_halal/model/favorite_model.dart';
 import 'package:simply_halal/network/network_api_client.dart';
+import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 import 'package:intl/intl.dart';
 
 class RestaurantDetailScreen extends StatelessWidget {
   final String id;
-  const RestaurantDetailScreen({super.key, required this.id});
+  final double distance;
+  const RestaurantDetailScreen(
+      {super.key, required this.id, required this.distance});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +30,37 @@ class RestaurantDetailScreen extends StatelessWidget {
                   final BusinessDetails businessDetails =
                       snapshot.data as BusinessDetails;
 
-                  return restaurantDetailsWidget(businessDetails);
+                  return FutureBuilder(
+                    future: checkIfFavorited(businessDetails),
+                    builder: ((context, snapshot) {
+                      if (snapshot.hasData) {
+                        Utils.isFavoriteClick = snapshot.data as bool;
+                        return RestaurantDetailsWidget(
+                            businessDetails: businessDetails,
+                            distance: distance);
+                      } else {
+                        return const Expanded(
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        );
+                      }
+                    }),
+                  );
                 } else {
-                  return const Text("No Data");
+                  return const Expanded(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
                 }
               })
         ],
@@ -33,36 +68,68 @@ class RestaurantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget restaurantDetailsWidget(BusinessDetails businessDetails) {
-    return Column(
-      children: [
-        // name of the business
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-          child: BigText(
-            text: businessDetails.name ?? '',
-            align: TextAlign.center,
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-            child: Column(
-              children: [
-                // Main Image of the business
-                imageRoundedBox(businessDetails.imageUrl ?? ''),
+  Future<bool> checkIfFavorited(BusinessDetails businessDetails) async {
+    final favoriteBusiness = FavoriteModel(
+        id: businessDetails.id ?? '',
+        imageUrl: businessDetails.imageUrl ?? '',
+        businessName: businessDetails.name ?? '',
+        distance: distance);
+    final business =
+        await DatabaseHelper.db.getFavoriteBusiness(favoriteBusiness);
 
-                // rating and favorite
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        child: Row(
+    log("$business");
+    if (business == null) {
+      return Future<bool>.value(false);
+    }
+    return Future<bool>.value(true);
+  }
+}
+
+class RestaurantDetailsWidget extends StatefulWidget {
+  final BusinessDetails businessDetails;
+  final double distance;
+  const RestaurantDetailsWidget(
+      {super.key, required this.businessDetails, required this.distance});
+
+  @override
+  State<RestaurantDetailsWidget> createState() =>
+      _RestaurantDetailsWidgetState();
+}
+
+class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
+  bool isFavoriteClick = Utils.isFavoriteClick;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // name of the business
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+            child: BigText(
+              text: widget.businessDetails.name ?? '',
+              align: TextAlign.center,
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              child: Column(
+                children: [
+                  // Main Image of the business
+                  imageRoundedBox(widget.businessDetails.imageUrl ?? ''),
+
+                  // rating and favorite
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
                           children: [
                             BigText(
-                              text: '${businessDetails.rating}/5',
+                              text: '${widget.businessDetails.rating}/5',
                             ),
                             const Icon(
                               Icons.star,
@@ -70,132 +137,168 @@ class RestaurantDetailScreen extends StatelessWidget {
                             )
                           ],
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Icon(Icons.favorite_outline),
-                      )
-                    ],
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isFavoriteClick = !isFavoriteClick;
+                              Utils.isFavoriteClick = isFavoriteClick;
+                            });
+                            _addOrDeleteFavoriteModel();
+                          },
+                          child: (isFavoriteClick == false)
+                              ? const Icon(Icons.favorite_outline)
+                              : const Icon(Icons.favorite, color: Colors.red),
+                        )
+                      ],
+                    ),
                   ),
-                ),
 
-                // Address
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SmallText(
-                        text: businessDetails.location!.address1 ?? '',
-                        size: 18,
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      SmallText(
-                        text:
-                            '${businessDetails.location!.city ?? ''}, ${businessDetails.location!.state ?? ''} ${businessDetails.location!.zipCode ?? ''}',
-                        size: 18,
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      SmallText(
-                        text: businessDetails.displayPhone ?? '',
-                        size: 18,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
+                  // Address
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SmallText(
+                          text: widget.businessDetails.location?.address1 ?? '',
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        SmallText(
+                          text:
+                              '${widget.businessDetails.location?.city ?? ''}, ${widget.businessDetails.location?.state ?? ''} ${widget.businessDetails.location?.zipCode ?? ''}',
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        SmallText(
+                          text: widget.businessDetails.displayPhone ?? '',
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                // Menu
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(
-                        text: 'Menu:',
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      SmallText(
-                        text: '${businessDetails.name} restaurant menu',
-                        size: 16,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(
-                        height: 18,
-                      ),
-                    ],
+                  // Menu
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(
+                          text: 'Menu:',
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        SmallText(
+                          text:
+                              '${widget.businessDetails.name} restaurant menu',
+                          size: 16,
+                          color: Colors.blue,
+                        ),
+                        const SizedBox(
+                          height: 18,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                // Hours
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Hours'),
-                      SmallText(
-                        text:
-                            'Mon: ${toNormalTime(extractStartHours(0, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Tue: ${toNormalTime(extractStartHours(1, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Wed: ${toNormalTime(extractStartHours(2, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Thurs: ${toNormalTime(extractStartHours(3, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Fri: ${toNormalTime(extractStartHours(4, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Sat: ${toNormalTime(extractStartHours(5, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                      SmallText(
-                        text:
-                            'Sun: ${toNormalTime(extractStartHours(6, businessDetails))} - ${toNormalTime(extractEndHours(0, businessDetails))}',
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            )),
-      ],
+                  // Hours
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        widget.businessDetails.hours == null
+                            ? Container()
+                            : BigText(text: 'Hours'),
+                        ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: widget.businessDetails.hours == null
+                                ? 0
+                                : widget.businessDetails.hours?[0].open!.length,
+                            itemBuilder: ((context, index) {
+                              final days = [
+                                'Sun',
+                                'Mon',
+                                "Tue",
+                                'Wed',
+                                'Thurs',
+                                'Fir',
+                                'Sat'
+                              ];
+                              return SmallText(
+                                text:
+                                    '${days[index]}: ${toNormalTime(extractStartHours(index, widget.businessDetails))} - ${toNormalTime(extractEndHours(index, widget.businessDetails))}',
+                                size: 14,
+                              );
+                            }))
+                      ],
+                    ),
+                  )
+                ],
+              )),
+        ],
+      ),
     );
   }
 
   // Helper functions
+
+  void _addOrDeleteFavoriteModel() {
+    final favoriteBusiness = FavoriteModel(
+      id: widget.businessDetails.id,
+      imageUrl: widget.businessDetails.imageUrl ?? '',
+      businessName: widget.businessDetails.name ?? '',
+      distance: widget.distance,
+    );
+
+    if (isFavoriteClick == true) {
+      log("add");
+      _addFavoriteBusiness(favoriteBusiness);
+    } else {
+      _deleteFavoriteBusiness(favoriteBusiness);
+      log("delete");
+    }
+  }
+
+  Future<FavoriteModel?> getFavoriteBusinessToDelete(
+      FavoriteModel favoriteModel) async {
+    final favoriteBusinessToDelete =
+        await DatabaseHelper.db.getFavoriteBusiness(favoriteModel);
+
+    return favoriteBusinessToDelete;
+  }
+
+  void _addFavoriteBusiness(FavoriteModel favoriteBusiness) async {
+    await DatabaseHelper.db.addFavorite(favoriteBusiness);
+  }
+
+  void _deleteFavoriteBusiness(FavoriteModel favoriteBusiness) async {
+    final favoriteBusinessToDelete =
+        await getFavoriteBusinessToDelete(favoriteBusiness);
+    log("${favoriteBusinessToDelete?.id}, ${favoriteBusinessToDelete?.businessName}");
+
+    await DatabaseHelper.db.deleteFavorite(favoriteBusinessToDelete!);
+  }
+
   String extractStartHours(int day, BusinessDetails businessDetails) {
-    return businessDetails.hours![0].open![day].start ?? '';
+    return businessDetails.hours?[0].open?[day].start ?? '';
   }
 
   String extractEndHours(int day, BusinessDetails businessDetails) {
-    return businessDetails.hours![0].open![day].end ?? '';
+    return businessDetails.hours?[0].open?[day].end ?? '';
   }
 
   String toNormalTime(String time) {
