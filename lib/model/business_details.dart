@@ -52,22 +52,21 @@ class BusinessDetails {
     if (json['categories'] != null) {
       categories = <Categories>[];
       json['categories'].forEach((v) {
-        categories!.add(new Categories.fromJson(v));
+        categories!.add(Categories.fromJson(v));
       });
     }
     rating = json['rating'];
-    location = json['location'] != null
-        ? new Location.fromJson(json['location'])
-        : null;
+    location =
+        json['location'] != null ? Location.fromJson(json['location']) : null;
     coordinates = json['coordinates'] != null
-        ? new Coordinates.fromJson(json['coordinates'])
+        ? Coordinates.fromJson(json['coordinates'])
         : null;
     photos = json['photos'].cast<String>();
     price = json['price'];
     if (json['hours'] != null) {
       hours = <Hours>[];
       json['hours'].forEach((v) {
-        hours!.add(new Hours.fromJson(v));
+        hours!.add(Hours.fromJson(v));
       });
     }
     transactions = json['transactions'].cast<String>();
@@ -126,7 +125,7 @@ class Categories {
 
 class Location {
   String? address1;
-  Null? address2;
+  String? address2;
   String? address3;
   String? city;
   String? zipCode;
