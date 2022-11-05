@@ -40,9 +40,9 @@ class DatabaseHelper {
         "image_url TEXT,"
         "distance REAL);");
 
-    await db.execute("CREATE TABLE Search_Business "
-        "(id TEXT PRIMARY KEY,"
-        "name TEXT NOT NULL,);");
+    await db.execute("CREATE TABLE Search_Business("
+        "id TEXT PRIMARY KEY,"
+        "name TEXT NOT NULL);");
   }
 
   // Businesses
@@ -129,6 +129,20 @@ class DatabaseHelper {
     return await db.delete("Search_Business",
         where: 'name = ?', whereArgs: [search.businessName]);
   }
+
+  Future<List<SearchModel>?> getAllRecentSearches() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query("Search_Business");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => SearchModel.fromJson(maps[index]));
+  }
+
 
   Future<SearchModel?> getSearchBusiness(SearchModel searchModel) async {
     final db = await database;
