@@ -1,5 +1,6 @@
 import 'package:simply_halal/model/business.dart';
 import 'package:simply_halal/model/favorite_model.dart';
+import 'package:simply_halal/model/search_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -38,6 +39,10 @@ class DatabaseHelper {
         "name TEXT NOT NULL,"
         "image_url TEXT,"
         "distance REAL);");
+
+    await db.execute("CREATE TABLE Search_Business "
+        "(id TEXT PRIMARY KEY,"
+        "name TEXT NOT NULL,);");
   }
 
   // Businesses
@@ -108,5 +113,47 @@ class DatabaseHelper {
 
     return List.generate(
         maps.length, (index) => FavoriteModel.fromJson(maps[index]));
+  }
+
+  // Search Model
+  Future<int> addSearch(SearchModel search) async {
+    final db = await database;
+
+    return await db.insert("Search_Business", search.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> deleteSearch(SearchModel search) async {
+    final db = await database;
+
+    return await db.delete("Search_Business",
+        where: 'name = ?', whereArgs: [search.businessName]);
+  }
+
+  Future<SearchModel?> getSearchBusiness(SearchModel searchModel) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query("Search_Business",
+        where: 'name = ?', whereArgs: [searchModel.businessName]);
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => SearchModel.fromJson(maps[index]))[0];
+  }
+
+  Future<List<SearchModel>?> getAllSearchs() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query("Search_Business");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => SearchModel.fromJson(maps[index]));
   }
 }
