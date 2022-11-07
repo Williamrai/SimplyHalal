@@ -23,57 +23,75 @@ class MapScreen extends StatefulWidget {
 }
 
 class MapScreenState extends State<MapScreen> {
+
   @override
   Widget build(BuildContext context) {
     // this will give you the latitude of the business details
     // widget.coordinates.latitude
-
     return Scaffold(
-      body: FlutterMap(
-          options: MapOptions(center: LatLng(40.7678, -73.9645), zoom: 16.0),
-          children: [
-            TileLayer(
-                urlTemplate:
-                    "https://api.mapbox.com/styles/v1/marz-hunter/cl9c7sag3000114mvj0scrwfb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ",
-                additionalOptions: const {
-                  'accessToken':
-                      'pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ',
-                  'id': 'mapbox.mapbox-streets-v8'
-                }),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  width: 50.0,
-                  height: 50.0,
-                  point: LatLng(40.7618, -73.97928),
-                  builder: (ctx) => Container(
-                    child: Icon(Icons.location_pin, color: Colors.red),
-                  ),
-                ),
-                Marker(
-                  width: 50.0,
-                  height: 50.0,
-                  point: LatLng(40.7678, -73.9645),
-                  builder: (ctx) => Container(
-                    child: Icon(Icons.my_location, color: Colors.black),
-                  ),
-                )
-              ],
-            ),
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: points,
-                  color: Colors.black,
-                  strokeWidth: 3,
-                ),
-              ],
-            )
-          ]),
+        body: FutureBuilder(
+            future: getCurrentUserLocation(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                // this gives the device current location
+                final curLocation = snapshot.data as cord.Coordinates;
+                return FlutterMap(
+                    options: MapOptions(
+                        center: LatLng(40.7678, -73.9645), zoom: 16.0),
+                    children: [
+                      TileLayer(
+                          urlTemplate:
+                          "https://api.mapbox.com/styles/v1/marz-hunter/cl9c7sag3000114mvj0scrwfb/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ",
+                          additionalOptions: const {
+                            'accessToken':
+                            'pk.eyJ1IjoibWFyei1odW50ZXIiLCJhIjoiY2t0N2lobXdhMHNxcDJ2cDR4YWV4YWdzaSJ9.hYkxPJNMNyX1PgTDS0sNBQ',
+                            'id': 'mapbox.mapbox-streets-v8'
+                          }),
+                      // halal restaurant location
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            width: 50.0,
+                            height: 50.0,
+                            point: LatLng(40.7618, -73.97928),
+                            builder: (ctx) =>
+                                Container(
+                                  child: Icon(Icons.location_pin, color: Colors
+                                      .red),
+                                ),
+                          ),
+
+                          // your location
+                          Marker(
+                            width: 50.0,
+                            height: 50.0,
+                            point: LatLng(curLocation.latitude!, curLocation.longitude!),
+                            builder: (ctx) =>
+                                Container(
+                                  child: Icon(Icons.my_location, color: Colors
+                                      .black),
+                                ),
+                          )
+                        ],
+                      ),
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: [LatLng(curLocation.latitude!, curLocation.longitude!), LatLng(40.7618, -73.97928)],
+                            color: Colors.black,
+                            strokeWidth: 3,
+                          ),
+                        ],
+                      )
+                    ]);
+              } else {
+              return Text("no valid location");
+              }
+
+            })
     );
   }
 
-  List<LatLng> points = [LatLng(40.7678, -73.9645), LatLng(40.7618, -73.97928)];
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -106,6 +124,7 @@ class MapScreenState extends State<MapScreen> {
     return cord.Coordinates(
         latitude: position.latitude, longitude: position.longitude);
   }
+
 
   double getDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
