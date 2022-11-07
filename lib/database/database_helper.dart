@@ -41,7 +41,7 @@ class DatabaseHelper {
         "distance REAL);");
 
     await db.execute("CREATE TABLE Search_Business("
-        "id TEXT PRIMARY KEY,"
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT NOT NULL);");
   }
 
@@ -158,7 +158,7 @@ class DatabaseHelper {
         maps.length, (index) => SearchModel.fromJson(maps[index]))[0];
   }
 
-  Future<List<SearchModel>?> getAllSearchs() async {
+  Future<List<SearchModel>?> getAllRecentSearch() async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps = await db.query("Search_Business");

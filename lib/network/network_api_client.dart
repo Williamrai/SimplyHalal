@@ -27,22 +27,4 @@ class NetworkAPiClient {
   static BusinessDetails _businessDetailsFromJson(json) =>
       BusinessDetails.fromJson(json);
 
-
-  static Future<Business?> getBusiness(String name) async {
-    final response = await NetworkService.sendGetRequestWithQuery(
-        url: SimplyHalalApiEndpoints.apiURL,
-        queryParam: SimplyHalalApiParam.searchQuery(businessName: name));
-
-    return await NetworkHelper.filterResponse(
-        callback: _businessFromJson,
-        response: response,
-        parameterName: CallBackParameterName.allBusiness,
-        onFailureCallbackWithMessage: (errorType, msg) {
-          debugPrint('Error Type: $errorType; message: $msg');
-          return null;
-        });
-  }
-
-  static Business _businessFromJson(json) =>
-      Business.fromJson(json);
 }
