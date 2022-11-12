@@ -1,8 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:simply_halal/model/business_details.dart';
 import 'package:simply_halal/network/network_enums.dart';
 import 'package:simply_halal/network/network_helper.dart';
 import 'package:simply_halal/network/network_service.dart';
 import 'package:simply_halal/network/simply_halal_api_endpoints.dart';
+import 'package:simply_halal/network/simply_halal_api_params.dart';
+
+import '../model/business.dart';
 
 class NetworkAPiClient {
   NetworkAPiClient._();
@@ -22,4 +26,5 @@ class NetworkAPiClient {
 
   static BusinessDetails _businessDetailsFromJson(json) =>
       BusinessDetails.fromJson(json);
+
 }

@@ -8,7 +8,6 @@ import 'package:simply_halal/network/network_api_client.dart';
 import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
-import 'package:intl/intl.dart';
 
 class RestaurantDetailScreen extends StatelessWidget {
   final String id;
