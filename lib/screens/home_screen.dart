@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/current_location.dart';
+import 'package:simply_halal/screens/randomize_screen.dart';
 import 'package:simply_halal/screens/restaurant_details_screen.dart';
 import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/Business_card_view.dart';
@@ -54,6 +57,18 @@ class HomeScreen extends StatelessWidget {
                     })),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Image.asset(
+          "images/shuffle.png",
+          height: 20,
+          width: 20,
+        ),
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => RandomizeScreen(business: businesses),
+          ));
+        },
       ),
     );
   }
