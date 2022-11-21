@@ -125,7 +125,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           }),
                     );
                   } else {
-                    return const Text("No Recent Searches");
+                    return const Padding(padding: EdgeInsets.fromLTRB(0, 5, 0, 0), child: Text("No Recent Searches"));
                   }
                 })
           ]),

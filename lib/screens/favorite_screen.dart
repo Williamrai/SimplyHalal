@@ -31,26 +31,33 @@ class FavoriteScreen extends StatelessWidget {
           ),
           // Body
           Expanded(
-            child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: favoriteModels.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => RestaurantDetailScreen(
-                                id: favoriteModels[index].id!,
-                                distance: favoriteModels[index].distance)),
+            child: favoriteModels.isEmpty
+                ? Center(
+                    child: BigText(
+                      text: "You don't have any favorites.",
+                      align: TextAlign.center,
+                    ),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: favoriteModels.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => RestaurantDetailScreen(
+                                    id: favoriteModels[index].id!,
+                                    distance: favoriteModels[index].distance)),
+                          );
+                        },
+                        child: favoriteView(
+                            imageUrl: favoriteModels[index].imageUrl,
+                            businessName: favoriteModels[index].businessName,
+                            distance: favoriteModels[index].distance),
                       );
-                    },
-                    child: favoriteView(
-                        imageUrl: favoriteModels[index].imageUrl,
-                        businessName: favoriteModels[index].businessName,
-                        distance: favoriteModels[index].distance),
-                  );
-                }),
+                    }),
           )
         ]),
       )),

@@ -5,6 +5,7 @@ import 'package:simply_halal/database/database_helper.dart';
 import 'package:simply_halal/model/business_details.dart';
 import 'package:simply_halal/model/favorite_model.dart';
 import 'package:simply_halal/network/network_api_client.dart';
+import 'package:simply_halal/screens/menu_screen.dart';
 import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
@@ -195,11 +196,20 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           const SizedBox(
                             height: 4,
                           ),
-                          SmallText(
-                            text:
-                                '${widget.businessDetails.name} restaurant menu',
-                            size: 16,
-                            color: Colors.blue,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MenuScreen(menuUrl: widget.businessDetails.url ?? ""),
+                                ),
+                              );
+                            },
+                            child: SmallText(
+                              text:
+                                  '${widget.businessDetails.name} restaurant menu',
+                              size: 16,
+                              color: Colors.blue,
+                            ),
                           ),
                           const SizedBox(
                             height: 18,
@@ -208,51 +218,58 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       ),
                     ),
 
-                    // Hours
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          widget.businessDetails.hours == null
-                              ? Container()
-                              : BigText(text: 'Hours'),
-                          ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount: widget.businessDetails.hours == null
-                                  ? 0
-                                  : widget.businessDetails.hours?[0].open!.length,
-                              itemBuilder: ((context, index) {
-                                final days = [
-                                  'Sun',
-                                  'Mon',
-                                  "Tue",
-                                  'Wed',
-                                  'Thurs',
-                                  'Fir',
-                                  'Sat'
-                                ];
-                                return SmallText(
-                                  text:
-                                      '${days[index]}: ${toNormalTime(extractStartHours(index, widget.businessDetails))} - ${toNormalTime(extractEndHours(index, widget.businessDetails))}',
-                                  size: 14,
-                                );
-                              }))
-                        ],
-                      ),
-                    )
-                  ],
-                )),
-          ],
-        ),
+                  // Hours
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        widget.businessDetails.hours == null
+                            ? Container()
+                            : BigText(text: 'Hours'),
+                        ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: widget.businessDetails.hours == null
+                                ? 0
+                                : widget.businessDetails.hours?[0].open!.length,
+                            itemBuilder: ((context, index) {
+                              final days = [
+                                'Sun',
+                                'Mon',
+                                "Tue",
+                                'Wed',
+                                'Thurs',
+                                'Fir',
+                                'Sat'
+                              ];
+                              return hoursView(days[index], toNormalTime(extractStartHours(index, widget.businessDetails)), toNormalTime(extractEndHours(index, widget.businessDetails)));
+
+                            }))
+                      ],
+                    ),
+                  )
+                ],
+              )),
+        ],
       ),
+    )
+    );
+  }
+
+  // Hours Widget
+  Widget hoursView(String day, String startHours, String endHours) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(padding: const EdgeInsets.fromLTRB(0, 10, 0, 0), child: BigText(text: day, size: 16,)),
+        SmallText(text: "$startHours - $endHours", size: 16,)
+      ],
     );
   }
 
   // Helper functions
-
   void _addOrDeleteFavoriteModel() {
     final favoriteBusiness = FavoriteModel(
       id: widget.businessDetails.id,
