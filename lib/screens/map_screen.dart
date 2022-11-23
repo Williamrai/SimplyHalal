@@ -143,7 +143,7 @@ class MapScreenState extends State<MapScreen> {
     return AppBar(backgroundColor: Colors.white, title: Text("5.0" + "mi"));
   }
 
-    double getDistance(lat1, lon1, lat2, lon2) {
+  double getDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
     var a = 0.5 -
