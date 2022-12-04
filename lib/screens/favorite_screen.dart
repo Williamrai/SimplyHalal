@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simply_halal/model/favorite_model.dart';
+import 'package:simply_halal/screens/restaurant_details_screen.dart';
+import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
 
@@ -29,16 +31,33 @@ class FavoriteScreen extends StatelessWidget {
           ),
           // Body
           Expanded(
-            child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: favoriteModels.length,
-                itemBuilder: (context, index) {
-                  return favoriteView(
-                      imageUrl: favoriteModels[index].imageUrl,
-                      businessName: favoriteModels[index].businessName,
-                      distance: favoriteModels[index].distance);
-                }),
+            child: favoriteModels.isEmpty
+                ? Center(
+                    child: BigText(
+                      text: "You don't have any favorites.",
+                      align: TextAlign.center,
+                    ),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: favoriteModels.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => RestaurantDetailScreen(
+                                    id: favoriteModels[index].id!,
+                                    distance: favoriteModels[index].distance)),
+                          );
+                        },
+                        child: favoriteView(
+                            imageUrl: favoriteModels[index].imageUrl,
+                            businessName: favoriteModels[index].businessName,
+                            distance: favoriteModels[index].distance),
+                      );
+                    }),
           )
         ]),
       )),
@@ -69,7 +88,9 @@ class FavoriteScreen extends StatelessWidget {
                   const SizedBox(
                     height: 6,
                   ),
-                  SmallText(text: "$distance mi")
+                  SmallText(
+                      text:
+                          "${Utils.getDistanceInMiles(distance).toStringAsFixed(2)} mi")
                 ],
               ),
             ),
