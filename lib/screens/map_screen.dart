@@ -7,11 +7,15 @@ import 'package:simply_halal/model/business.dart';
 import 'package:simply_halal/model/business_details.dart' as cord;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:simply_halal/utils.dart';
 
 //import 'package:turf/turf.dart';
 import 'dart:math';
 
 import 'package:simply_halal/widgets/big_text.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+import '../widgets/small_text.dart';
 
 class MapScreen extends StatefulWidget {
   // This is under BusinessDetails file
@@ -21,8 +25,9 @@ class MapScreen extends StatefulWidget {
   // to update it goTo restaurantDetailsWidget() of RestaurantDetailsScreen
   // this will be provide the coordinates of the restaurant
   final cord.Coordinates coordinates;
+  final double distance;
 
-  MapScreen({super.key, required this.coordinates});
+  const MapScreen({super.key, required this.coordinates, required this.distance});
 
   @override
   MapScreenState createState() => MapScreenState();
@@ -43,14 +48,21 @@ class MapScreenState extends State<MapScreen> {
                 final curLocation = snapshot.data as cord.Coordinates;
                 // restaurants coordinates = lat: 40.7618, long: -73.97928
                 // user coordinates = curLocation.latitude!, curLocation.longitude!
-                double miles = getDistance(40.7618, -73.97928,
-                    curLocation.latitude!, curLocation.longitude!);
-                String distance = "${miles.toStringAsFixed(2)} miles";
+                double miles = getDistance(
+                    widget.coordinates.latitude,
+                    widget.coordinates.longitude,
+                    curLocation.latitude!,
+                    curLocation.longitude!);
+                String distance = "${Utils.getDistanceInMiles(widget.distance).toStringAsFixed(2)} miles";
+                String url =
+                    "https://www.google.com/maps/dir/?api=1&origin=${curLocation.latitude},${curLocation.longitude}&destination=${widget.coordinates.latitude},${widget.coordinates.longitude}";
+
                 return Column(
                   children: [
                     AppBar(
-                        backgroundColor: Colors.white, title: Text(distance)),
-                    Container(
+                        backgroundColor: Colors.white,
+                        title: const Text("Direction")),
+                    SizedBox(
                       width: double.infinity,
                       height: 300,
                       child: Padding(
@@ -63,7 +75,7 @@ class MapScreenState extends State<MapScreen> {
                               bounds: LatLngBounds(
                                 LatLng(curLocation.latitude!,
                                     curLocation.longitude!),
-                                LatLng(40.7618, -73.97928),
+                                LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!),
                               ),
                               boundsOptions: FitBoundsOptions(
                                   padding: EdgeInsets.all(25.0)),
@@ -84,7 +96,7 @@ class MapScreenState extends State<MapScreen> {
                                     // Restaurant Marker
                                     width: 50.0,
                                     height: 50.0,
-                                    point: LatLng(40.7618, -73.97928),
+                                    point: LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!),
                                     builder: (ctx) => const Icon(
                                         Icons.location_pin,
                                         color: Colors.red),
@@ -109,7 +121,7 @@ class MapScreenState extends State<MapScreen> {
                                     points: [
                                       LatLng(curLocation.latitude!,
                                           curLocation.longitude!),
-                                      LatLng(40.7618, -73.97928)
+                                      LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!)
                                     ],
                                     color: Colors.black,
                                     strokeWidth: 3,
@@ -121,11 +133,22 @@ class MapScreenState extends State<MapScreen> {
                       ),
                     ),
 
-                    // Show navigation in
+                    // distance
                     SizedBox(
                         width: double.infinity,
+                        height: 60,
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
+                            padding: const EdgeInsets.all(8),
+                            child: SmallText(
+                              text: "Distance: $distance",
+                              size: 18,
+                            ))),
+
+                    // Show navigation in
+                    SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                           child: BigText(
                             text: "Open Navigation in",
                             size: 20,
@@ -133,10 +156,12 @@ class MapScreenState extends State<MapScreen> {
                           ),
                         )),
                     Container(
-                      width: double.infinity,
+                      width: MediaQuery.of(context).size.width / 1.3,
                       margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            launchUrlString(url);
+                          },
                           child: BigText(
                             text: "Google Maps",
                             align: TextAlign.center,
@@ -149,6 +174,14 @@ class MapScreenState extends State<MapScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
             }));
+  }
+
+  void _launchGoogleMap(String googleMapsUrl) async {
+    if (await canLaunchUrlString(googleMapsUrl)) {
+      await launchUrlString(googleMapsUrl);
+    } else {
+      throw ("Could not open the map");
+    }
   }
 
   Future<Position> _determinePosition() async {
