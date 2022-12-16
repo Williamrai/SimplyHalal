@@ -23,12 +23,13 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
               child: Text(
-                "${CurrentLocation.currentLocality}, ${CurrentLocation.currentMetropolitian}",
+                CurrentLocation.streetName == "" ? "${CurrentLocation.currentMetropolitian}, ${CurrentLocation.currentLocality}"
+                    : "${CurrentLocation.streetName}, ${CurrentLocation.currentMetropolitian}, ${CurrentLocation.currentLocality}",
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontFamily: 'OpenSans',
                     fontWeight: FontWeight.w700,
-                    fontSize: 20),
+                    fontSize: 18),
               ),
             ),
             Expanded(

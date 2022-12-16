@@ -3,4 +3,6 @@ class CurrentLocation {
 
   static var currentLocality = "";
   static var currentMetropolitian = "";
+
+  static var streetName = "";
 }

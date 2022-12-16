@@ -167,6 +167,10 @@ class _RootPageState extends State<RootPage> {
     Utils.currentLocLong = position.longitude;
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
+    debugPrint("apple location homes: ${placemarks}");
+    debugPrint("apple location home: ${placemarks[0]}");
+
+    CurrentLocation.streetName = placemarks[0].street ?? "";
     CurrentLocation.currentLocality = placemarks[0].postalCode ?? "";
     CurrentLocation.currentMetropolitian =
         placemarks[0].administrativeArea ?? "";

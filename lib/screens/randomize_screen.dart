@@ -18,9 +18,9 @@ class RandomizeScreen extends StatefulWidget {
 class _RandomizeScreenState extends State<RandomizeScreen> {
   final statusText = [
     "Getting Restaurant Information",
-    "Finding the nearest restaurant for you",
-    "Just a sec",
-    "A little bit"
+    "Searching an amazing restaurant for you",
+    "Almost there",
+    "Thank you for your patience."
   ];
 
   var counter = 0;
