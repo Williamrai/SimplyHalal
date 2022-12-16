@@ -5,6 +5,7 @@ import 'package:simply_halal/database/database_helper.dart';
 import 'package:simply_halal/model/business_details.dart';
 import 'package:simply_halal/model/favorite_model.dart';
 import 'package:simply_halal/network/network_api_client.dart';
+import 'package:simply_halal/screens/menu_screen.dart';
 import 'package:simply_halal/utils.dart';
 import 'package:simply_halal/widgets/big_text.dart';
 import 'package:simply_halal/widgets/small_text.dart';
@@ -38,26 +39,22 @@ class RestaurantDetailScreen extends StatelessWidget {
                             businessDetails: businessDetails,
                             distance: distance);
                       } else {
-                        return const Expanded(
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                        return const SizedBox(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Center(
+                            child: CircularProgressIndicator(),
                           ),
                         );
                       }
                     }),
                   );
                 } else {
-                  return const Expanded(
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                  return const SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
                   );
                 }
@@ -100,116 +97,126 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // name of the business
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-            child: BigText(
-              text: widget.businessDetails.name ?? '',
-              align: TextAlign.center,
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // name of the business
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: BigText(
+                text: widget.businessDetails.name ?? '',
+                align: TextAlign.center,
+              ),
             ),
-          ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-              child: Column(
-                children: [
-                  // Main Image of the business
-                  imageRoundedBox(widget.businessDetails.imageUrl ?? ''),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Column(
+                  children: [
+                    // Main Image of the business
+                    imageRoundedBox(widget.businessDetails.imageUrl ?? ''),
 
-                  // rating and favorite
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            BigText(
-                              text: '${widget.businessDetails.rating}/5',
+                    // rating and favorite
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              BigText(
+                                text: '${widget.businessDetails.rating}/5',
+                              ),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              )
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isFavoriteClick = !isFavoriteClick;
+                                Utils.isFavoriteClick = isFavoriteClick;
+                              });
+                              _addOrDeleteFavoriteModel();
+                            },
+                            child: (isFavoriteClick == false)
+                                ? const Icon(Icons.favorite_outline)
+                                : const Icon(Icons.favorite, color: Colors.red),
+                          )
+                        ],
+                      ),
+                    ),
+
+                    // Address
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SmallText(
+                            text: widget.businessDetails.location?.address1 ?? '',
+                            size: 18,
+                          ),
+                          const SizedBox(
+                            height: 4,
+                          ),
+                          SmallText(
+                            text:
+                                '${widget.businessDetails.location?.city ?? ''}, ${widget.businessDetails.location?.state ?? ''} ${widget.businessDetails.location?.zipCode ?? ''}',
+                            size: 18,
+                          ),
+                          const SizedBox(
+                            height: 4,
+                          ),
+                          SmallText(
+                            text: widget.businessDetails.displayPhone ?? '',
+                            size: 18,
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Menu
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(
+                            text: 'Menu:',
+                          ),
+                          const SizedBox(
+                            height: 4,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MenuScreen(menuUrl: widget.businessDetails.url ?? ""),
+                                ),
+                              );
+                            },
+                            child: SmallText(
+                              text:
+                                  '${widget.businessDetails.name} restaurant menu',
+                              size: 16,
+                              color: Colors.blue,
                             ),
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            )
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isFavoriteClick = !isFavoriteClick;
-                              Utils.isFavoriteClick = isFavoriteClick;
-                            });
-                            _addOrDeleteFavoriteModel();
-                          },
-                          child: (isFavoriteClick == false)
-                              ? const Icon(Icons.favorite_outline)
-                              : const Icon(Icons.favorite, color: Colors.red),
-                        )
-                      ],
+                          ),
+                          const SizedBox(
+                            height: 18,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-
-                  // Address
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SmallText(
-                          text: widget.businessDetails.location?.address1 ?? '',
-                          size: 18,
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        SmallText(
-                          text:
-                              '${widget.businessDetails.location?.city ?? ''}, ${widget.businessDetails.location?.state ?? ''} ${widget.businessDetails.location?.zipCode ?? ''}',
-                          size: 18,
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        SmallText(
-                          text: widget.businessDetails.displayPhone ?? '',
-                          size: 18,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Menu
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BigText(
-                          text: 'Menu:',
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        SmallText(
-                          text:
-                              '${widget.businessDetails.name} restaurant menu',
-                          size: 16,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(
-                          height: 18,
-                        ),
-                      ],
-                    ),
-                  ),
 
                   // Hours
                   Container(
@@ -237,11 +244,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 'Fir',
                                 'Sat'
                               ];
-                              return SmallText(
-                                text:
-                                    '${days[index]}: ${toNormalTime(extractStartHours(index, widget.businessDetails))} - ${toNormalTime(extractEndHours(index, widget.businessDetails))}',
-                                size: 14,
-                              );
+                              return hoursView(days[index], toNormalTime(extractStartHours(index, widget.businessDetails)), toNormalTime(extractEndHours(index, widget.businessDetails)));
+
                             }))
                       ],
                     ),
@@ -250,11 +254,22 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
               )),
         ],
       ),
+    )
+    );
+  }
+
+  // Hours Widget
+  Widget hoursView(String day, String startHours, String endHours) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(padding: const EdgeInsets.fromLTRB(0, 10, 0, 0), child: BigText(text: day, size: 16,)),
+        SmallText(text: "$startHours - $endHours", size: 16,)
+      ],
     );
   }
 
   // Helper functions
-
   void _addOrDeleteFavoriteModel() {
     final favoriteBusiness = FavoriteModel(
       id: widget.businessDetails.id,

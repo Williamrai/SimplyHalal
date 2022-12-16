@@ -141,7 +141,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-
   void loadProgress() {
     if (visible == true) {
       setState(() {
