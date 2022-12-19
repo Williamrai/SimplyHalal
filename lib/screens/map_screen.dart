@@ -27,7 +27,8 @@ class MapScreen extends StatefulWidget {
   final cord.Coordinates coordinates;
   final double distance;
 
-  const MapScreen({super.key, required this.coordinates, required this.distance});
+  const MapScreen(
+      {super.key, required this.coordinates, required this.distance});
 
   @override
   MapScreenState createState() => MapScreenState();
@@ -53,9 +54,14 @@ class MapScreenState extends State<MapScreen> {
                     widget.coordinates.longitude,
                     curLocation.latitude!,
                     curLocation.longitude!);
-                String distance = "${Utils.getDistanceInMiles(widget.distance).toStringAsFixed(2)} miles";
+                String distance =
+                    "${Utils.getDistanceInMiles(widget.distance).toStringAsFixed(2)} miles";
                 String url =
                     "https://www.google.com/maps/dir/?api=1&origin=${curLocation.latitude},${curLocation.longitude}&destination=${widget.coordinates.latitude},${widget.coordinates.longitude}";
+                double zoomMin = 10.54;
+                if (miles < 3) {
+                  zoomMin = 14;
+                }
 
                 return Column(
                   children: [
@@ -71,11 +77,12 @@ class MapScreenState extends State<MapScreen> {
                             options: MapOptions(
                               /* center: LatLng(curLocation.latitude!,
                                   curLocation.longitude!),*/
-                              minZoom: 11.54,
+                              minZoom: zoomMin,
                               bounds: LatLngBounds(
                                 LatLng(curLocation.latitude!,
                                     curLocation.longitude!),
-                                LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!),
+                                LatLng(widget.coordinates.latitude!,
+                                    widget.coordinates.longitude!),
                               ),
                               boundsOptions: FitBoundsOptions(
                                   padding: EdgeInsets.all(25.0)),
@@ -96,7 +103,8 @@ class MapScreenState extends State<MapScreen> {
                                     // Restaurant Marker
                                     width: 50.0,
                                     height: 50.0,
-                                    point: LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!),
+                                    point: LatLng(widget.coordinates.latitude!,
+                                        widget.coordinates.longitude!),
                                     builder: (ctx) => const Icon(
                                         Icons.location_pin,
                                         color: Colors.red),
@@ -121,7 +129,8 @@ class MapScreenState extends State<MapScreen> {
                                     points: [
                                       LatLng(curLocation.latitude!,
                                           curLocation.longitude!),
-                                      LatLng(widget.coordinates.latitude!, widget.coordinates.longitude!)
+                                      LatLng(widget.coordinates.latitude!,
+                                          widget.coordinates.longitude!)
                                     ],
                                     color: Colors.black,
                                     strokeWidth: 3,
@@ -141,6 +150,7 @@ class MapScreenState extends State<MapScreen> {
                             padding: const EdgeInsets.all(8),
                             child: SmallText(
                               text: "Distance: $distance",
+                              align: TextAlign.center,
                               size: 18,
                             ))),
 
@@ -176,7 +186,7 @@ class MapScreenState extends State<MapScreen> {
             }));
   }
 
-  void _launchGoogleMap(String googleMapsUrl) async {
+   void _launchGoogleMap(String googleMapsUrl) async {
     if (await canLaunchUrlString(googleMapsUrl)) {
       await launchUrlString(googleMapsUrl);
     } else {
@@ -184,6 +194,16 @@ class MapScreenState extends State<MapScreen> {
     }
   }
 
+/*
+  static Future<void> _launchGoogleMap(String googleMapsUrl) async {
+    if (await canLaunchUrlString(googleMapsUrl)) {
+      await launchUrlString(googleMapsUrl,
+          mode: LaunchMode.externalApplication);
+    } else {
+      throw ("Could not open the map");
+    }
+  }
+*/
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
