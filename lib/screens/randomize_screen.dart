@@ -42,24 +42,28 @@ class _RandomizeScreenState extends State<RandomizeScreen> {
         ),
         AnimatedTextKit(animatedTexts: [
           RotateAnimatedText(statusText[0],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[1],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[2],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[3],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',

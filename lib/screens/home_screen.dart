@@ -53,7 +53,8 @@ class HomeScreen extends StatelessWidget {
                             imageUrl: business.imageUrl,
                             miles:
                                 "${Utils.getDistanceInMiles(business.distance!).toStringAsFixed(2)} mi",
-                            name: business.name),
+                            name: business.name,
+                        rating: business.rating ?? 0.0,),
                       );
                     })),
           ],
