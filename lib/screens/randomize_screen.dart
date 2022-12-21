@@ -18,9 +18,9 @@ class RandomizeScreen extends StatefulWidget {
 class _RandomizeScreenState extends State<RandomizeScreen> {
   final statusText = [
     "Getting Restaurant Information",
-    "Finding the nearest restaurant for you",
-    "Just a sec",
-    "A little bit"
+    "Searching an amazing restaurant for you",
+    "Almost there",
+    "Thank you for your patience."
   ];
 
   var counter = 0;
@@ -42,24 +42,28 @@ class _RandomizeScreenState extends State<RandomizeScreen> {
         ),
         AnimatedTextKit(animatedTexts: [
           RotateAnimatedText(statusText[0],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[1],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[2],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',
                 fontWeight: FontWeight.w700,
               )),
           RotateAnimatedText(statusText[3],
+              textAlign: TextAlign.center,
               textStyle: const TextStyle(
                 fontSize: 20,
                 fontFamily: 'OpenSans',

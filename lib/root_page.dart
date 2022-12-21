@@ -8,10 +8,8 @@ import 'package:simply_halal/network/network_helper.dart';
 import 'package:simply_halal/network/network_service.dart';
 import 'package:simply_halal/network/simply_halal_api_endpoints.dart';
 import 'package:simply_halal/network/simply_halal_api_params.dart';
-import 'package:simply_halal/screens/account_screen.dart';
 import 'package:simply_halal/screens/favorite_screen.dart';
 import 'package:simply_halal/screens/home_screen.dart';
-import 'package:simply_halal/screens/randomize_screen.dart';
 import 'package:simply_halal/screens/search_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -77,8 +75,6 @@ class _RootPageState extends State<RootPage> {
   Widget getCurrentScreen(int pageIndex) {
     switch (pageIndex) {
       case 0:
-        // return HomeScreen(businesses: []);
-        //@TODO uncomment below code and comment above code before demo or testing where home screen API call is required
         return RefreshIndicator(
             onRefresh: () => _refreshData(context),
             child: FutureBuilder(
@@ -165,6 +161,10 @@ class _RootPageState extends State<RootPage> {
     Utils.currentLocLong = position.longitude;
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
+    debugPrint("apple location homes: ${placemarks}");
+    debugPrint("apple location home: ${placemarks[0]}");
+
+    CurrentLocation.streetName = placemarks[0].street ?? "";
     CurrentLocation.currentLocality = placemarks[0].postalCode ?? "";
     CurrentLocation.currentMetropolitian =
         placemarks[0].administrativeArea ?? "";

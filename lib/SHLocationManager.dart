@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:simply_halal/model/current_location.dart';
@@ -14,6 +15,8 @@ class SHLocationManager {
     Utils.currentLocLong = position.longitude;
     List<Placemark> placemarks =
     await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    debugPrint("apple location ${placemarks[0]}");
     CurrentLocation.currentLocality = placemarks[0].postalCode ?? "";
     CurrentLocation.currentMetropolitian =
         placemarks[0].administrativeArea ?? "";
